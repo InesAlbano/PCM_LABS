@@ -12,16 +12,16 @@ void pixelized(int macro){
   for (int x = 0; x < img.width; x += macro){
     for (int y = 0; y < img.height; y += macro){
       new_pixel_color(x, y, macro);
+      
     }
-  }
-  
-  
-  /* Other ways
-  for (int x = 0; x < img.width ; x += 10){
-    for (int y = 0; y < img.height; y += 10){
+  }  
+  /* Other way
+  for (int x = 0; x < img.width ; x += macro){
+    for (int y = 0; y < img.height; y += macro){
       update_color(x,y,macro);
     }
   }*/
+  
   img.updatePixels();
 }
 
@@ -57,9 +57,11 @@ void new_pixel_color(int x, int y, int macro){
   
   for (int i = 0; i < macro; ++i){
     for (int j = 0; j < macro; ++j){
-      img.pixels[(j+y)*img.width+(i+x)] = color(r,g,b);
+      //img.pixels[(j+y)*img.width+(i+x)] = color(r,b,g);
+      fill(color(r,g,b));
+      rect(x,y,macro,macro);
     }
-  }  
+  } 
 }
 
 
