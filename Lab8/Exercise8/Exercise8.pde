@@ -64,7 +64,18 @@ void new_pixel_color(int x, int y, int macro){
   } 
 }
 
-
+void monochromePix(int value) {
+  for (int x = 0; x < img.width; x++){
+    for (int y = 0; y < img.height; y++){
+      int loc = x + y*img.width;
+      
+      img.pixels[loc] = color(255,0,0);
+      
+    }
+  }
+  img.updatePixels();
+  pixelized(value);
+}
 
 void setup(){
   img = loadImage("PCMLab8.png");
@@ -103,8 +114,10 @@ void keyPressed(){
   } else if (key == 'b') {
     if (drawH == false) {
       //stackedHist();
+      monochromePix(10);
       drawH = true;
     } else {
+      setup(); 
       drawH = false;
     }
   } else if (key == 'c') {
