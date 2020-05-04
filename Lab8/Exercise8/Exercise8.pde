@@ -5,11 +5,9 @@ int macro_pixels = 1;
 boolean contrast = false;
 boolean mono = false;
 boolean bright = false;
-//PImage[] pixels;
+int count = 1;
 
 void pixelized(int macro){
-  int pixel_right = img.width % macro;
-  int pixel_bottom = img.height % macro;
   noStroke();
   
   for (int x = 0; x < img.width; x += macro){
@@ -67,7 +65,7 @@ void new_pixel_color(int x, int y, int macro){
 }
 
 void monochromePix(int value) {
-  colorMode(HSB,360);
+  colorMode(HSB,360,100,100);
   for (int i = 0; i < img.width * img.height; i++) {
     float b = brightness(img.pixels[i]);
     float s = value;
@@ -118,29 +116,31 @@ void draw(){
   if (drawH == false) {
     image(img, 0, 0);
   }
+  
+  if (key == 'e'){
+    System.out.println(count);
+    if(count <= 10) {
+      pixelized(count);
+      count++;
+    }
+    else {
+      pixelized(count);
+    }
+  }
+  
+  else if (key == 'f') {
+    count = 1;
+  }
+  
 }
 
-
 void keyPressed(){
-  if (key == 'a'){
-    if (drawH == false) {
-      /*if( key >= '0' && key <= '9' ){
-        System.out.println("hello");
-        number_string += char(key);
-        print(key);
-      } else if (key == BACKSPACE && number_string.length() > 0 ){
-        number_string = number_string.substring(  0, number_string.length()-1 );
-     print(key);
-     } else if (key == ENTER){
-       macro_pixels = int(number_string);
-       pixelized(macro_pixels);
-     }
-      drawH = true;
-      number_string = */
-      pixelized(10);
-      drawH = true;
-    } else {
-      drawH = false;
+    if (key == 'a'){
+      if (drawH == false) {
+        pixelized(10);
+        drawH = true;
+      } else {
+        drawH = false;
     }
   } else if (key == 'b') {
     if (mono == false) {
@@ -152,7 +152,7 @@ void keyPressed(){
     }
   } else if (key == 'c') {
     if (bright == false) {
-      changeBrightness(2);
+      changeBrightness(3);
       bright = true;
     } else {
       setup();
@@ -161,7 +161,7 @@ void keyPressed(){
   } else if (key == 'd') {
     if (contrast == false) {
       //stackedHist();
-      changeContrast(10);
+      changeContrast(5);
       contrast = true;
     } else {
       setup();
