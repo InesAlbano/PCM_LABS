@@ -2,7 +2,10 @@ PImage img;
 boolean drawH = false;
 String number_string = "";
 int macro_pixels = 1;
-PImage[] pixels;
+boolean contrast = false;
+boolean mono = false;
+boolean bright = false;
+//PImage[] pixels;
 
 void pixelized(int macro){
   int pixel_right = img.width % macro;
@@ -12,7 +15,6 @@ void pixelized(int macro){
   for (int x = 0; x < img.width; x += macro){
     for (int y = 0; y < img.height; y += macro){
       new_pixel_color(x, y, macro);
-      
     }
   }  
   /* Other way
@@ -65,19 +67,48 @@ void new_pixel_color(int x, int y, int macro){
 }
 
 void monochromePix(int value) {
-  for (int x = 0; x < img.width; x++){
-    for (int y = 0; y < img.height; y++){
-      int loc = x + y*img.width;
-      
-      img.pixels[loc] = color(255,0,0);
-      
-    }
+  colorMode(HSB,360);
+  for (int i = 0; i < img.width * img.height; i++) {
+    float b = brightness(img.pixels[i]);
+    float s = value;
+    
+    color c = color(120,s,b);
+    
+    img.pixels[i] = c;
   }
   img.updatePixels();
-  pixelized(value);
+  colorMode(RGB, 255,255,255);
+}
+
+//Alinea 3
+void changeBrightness(int number) {
+  for (int i = 0; i < img.width * img.height; ++i){
+    img.pixels[i] = color(number * int(img.pixels[i] >> 16 & 0xFF), number * int(img.pixels[i] >> 8 & 0xFF), number * int(img.pixels[i] & 0xFF));
+  }
+  img.updatePixels(); 
+}
+
+void changeContrast(int value) {
+  for(int i = 0; i < img.width * img.height; i++) {
+    float r,g,b;
+    
+     r = red(img.pixels[i]);
+     g = green(img.pixels[i]);
+     b = blue(img.pixels[i]);
+     
+     r = value * (r - 127) + 127;
+     g = value * (g - 127) + 127;
+     b = value * (b - 127) + 127;
+     
+     color c = color(r,g,b);
+     
+     img.pixels[i] = c;
+  }
+  img.updatePixels();
 }
 
 void setup(){
+  colorMode(RGB,255,255,255);
   img = loadImage("PCMLab8.png");
   surface.setSize(img.width, img.height);
   img.loadPixels();
@@ -112,27 +143,29 @@ void keyPressed(){
       drawH = false;
     }
   } else if (key == 'b') {
-    if (drawH == false) {
-      //stackedHist();
-      monochromePix(10);
-      drawH = true;
+    if (mono == false) {
+      monochromePix(100);
+      mono = true;
     } else {
-      setup(); 
-      drawH = false;
+      setup();
+      mono = false;
     }
   } else if (key == 'c') {
-    if (drawH == false) {
-      //stackedHist();
-      drawH = true;
+    if (bright == false) {
+      changeBrightness(2);
+      bright = true;
     } else {
-      drawH = false;
+      setup();
+      bright = false;
     }
   } else if (key == 'd') {
-    if (drawH == false) {
+    if (contrast == false) {
       //stackedHist();
-      drawH = true;
+      changeContrast(10);
+      contrast = true;
     } else {
-      drawH = false;
+      setup();
+      contrast = false;
     }
   }
 }
