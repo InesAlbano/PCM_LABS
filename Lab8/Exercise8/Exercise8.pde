@@ -45,15 +45,15 @@ void new_pixel_color(int x, int y, int macro){
   
   for (int i = 0; i < new_colors.length; ++i){
     for (int j = 0; j < new_colors.length; ++j){
-      r += Math.pow(red(new_colors[i][j]), 2);
-      g += Math.pow(green(new_colors[i][j]), 2);
-      b += Math.pow(blue(new_colors[i][j]), 2);
+      r += red(new_colors[i][j]);
+      g += green(new_colors[i][j]);
+      b += blue(new_colors[i][j]);
     }
   }
   
-  r = (int) Math.sqrt(r/color_matrix_size);
-  g = (int) Math.sqrt(g/color_matrix_size);
-  b = (int) Math.sqrt(b/color_matrix_size);
+  r = (int) (r/color_matrix_size);
+  g = (int) (g/color_matrix_size);
+  b = (int) (b/color_matrix_size);
   
   for (int i = 0; i < macro; ++i){
     for (int j = 0; j < macro; ++j){
@@ -118,7 +118,6 @@ void draw(){
   }
   
   if (key == 'e'){
-    System.out.println(count);
     if(count <= 10) {
       pixelized(count);
       count++;
