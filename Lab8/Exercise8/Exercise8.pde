@@ -1,6 +1,5 @@
 PImage img;
 boolean drawH = false;
-String number_string = "";
 int macro_pixels = 1;
 boolean contrast = false;
 boolean mono = false;
@@ -9,12 +8,23 @@ int count = 1;
 
 void pixelized(int macro){
   noStroke();
-  
-  for (int x = 0; x < img.width; x += macro){
-    for (int y = 0; y < img.height; y += macro){
-      new_pixel_color(x, y, macro);
+  int pixWidth = img.width % macro;
+  int pixHeight = img.height % macro;
+
+  for (int x = 0; x < img.width - pixWidth; x += macro){
+    for (int y = 0; y < img.height - pixHeight; y += macro){
+      new_pixel_color(x, y, macro, macro);
     }
-  }  
+  } 
+
+  for (int y = 0; y < img.height; y += pixHeight){
+    new_pixel_color(img.width-pixWidth, y, pixWidth, pixHeight);
+  }
+
+  for (int y = 0; y < img.width; y += pixHeight){
+    new_pixel_color(y, img.height-pixHeight, pixWidth, pixHeight);
+  } 
+ 
   /* Other way
   for (int x = 0; x < img.width ; x += macro){
     for (int y = 0; y < img.height; y += macro){
@@ -31,20 +41,20 @@ void update_color(int x, int y, int macro){
   rect(x,y,macro,macro);
 }
 
-void new_pixel_color(int x, int y, int macro){
+void new_pixel_color(int x, int y, int macroW, int macroY){
   int r = 0, g = 0, b = 0;
-  color[][] new_colors = new color[macro][macro];
-  for (int i = x; i < macro + x; ++i){
-    for (int j = y; j < macro + y; ++j){
+  color[][] new_colors = new color[macroW][macroY];
+  for (int i = x; i < macroW + x; ++i){
+    for (int j = y; j < macroY + y; ++j){
       new_colors[i-x][j-y] = img.get(i,j);
     }
   }
  
-  int color_matrix_size = (int) Math.pow(new_colors.length, 2);
+  int color_matrix_size = (int) macroW * macroY;
   
   
-  for (int i = 0; i < new_colors.length; ++i){
-    for (int j = 0; j < new_colors.length; ++j){
+  for (int i = 0; i < macroW; ++i){
+    for (int j = 0; j < macroY; ++j){
       r += red(new_colors[i][j]);
       g += green(new_colors[i][j]);
       b += blue(new_colors[i][j]);
@@ -55,15 +65,14 @@ void new_pixel_color(int x, int y, int macro){
   g = (int) (g/color_matrix_size);
   b = (int) (b/color_matrix_size);
   
-  for (int i = 0; i < macro; ++i){
-    for (int j = 0; j < macro; ++j){
+  for (int i = 0; i < macroW; ++i){
+    for (int j = 0; j < macroY; ++j){
       //img.pixels[(j+y)*img.width+(i+x)] = color(r,b,g);
       fill(color(r,g,b));
-      rect(x,y,macro,macro);
+      rect(x,y,macroW,macroY);
     }
   } 
 }
-
 void monochromePix(int value) {
   colorMode(HSB,360,100,100);
   for (int i = 0; i < img.width * img.height; i++) {
@@ -136,7 +145,7 @@ void draw(){
 void keyPressed(){
     if (key == 'a'){
       if (drawH == false) {
-        pixelized(10);
+        pixelized(5);
         drawH = true;
       } else {
         drawH = false;
