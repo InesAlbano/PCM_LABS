@@ -17,14 +17,21 @@ void pixelized(int macro){
     }
   } 
 
-  for (int y = 0; y < img.height; y += pixHeight){
-    new_pixel_color(img.width-pixWidth, y, pixWidth, pixHeight);
+  if(pixWidth != 0) {
+    for (int y = 0; y < img.height-macro; y += macro){
+      new_pixel_color(img.width-pixWidth, y, pixWidth, macro);
+    }
   }
-
-  for (int y = 0; y < img.width; y += pixHeight){
-    new_pixel_color(y, img.height-pixHeight, pixWidth, pixHeight);
-  } 
- 
+   
+   if (pixHeight != 0) {
+    for (int y = 0; y < img.width-macro; y += macro){
+      new_pixel_color(y, img.height-pixHeight, macro, pixHeight);
+    }
+  }
+  
+  if(pixWidth != 0 && pixHeight != 0) {
+    new_pixel_color(img.width-pixWidth,img.height-pixHeight, pixWidth, pixHeight);
+  }
   /* Other way
   for (int x = 0; x < img.width ; x += macro){
     for (int y = 0; y < img.height; y += macro){
@@ -77,9 +84,8 @@ void monochromePix(int value) {
   colorMode(HSB,360,100,100);
   for (int i = 0; i < img.width * img.height; i++) {
     float b = brightness(img.pixels[i]);
-    float s = value;
     
-    color c = color(120,s,b);
+    color c = color(value,75,b);
     
     img.pixels[i] = c;
   }
@@ -107,6 +113,7 @@ void changeContrast(int value) {
      g = value * (g - 127) + 127;
      b = value * (b - 127) + 127;
      
+     
      color c = color(r,g,b);
      
      img.pixels[i] = c;
@@ -116,7 +123,7 @@ void changeContrast(int value) {
 
 void setup(){
   colorMode(RGB,255,255,255);
-  img = loadImage("PCMLab8.png");
+  img = loadImage("hellothere.jpg");
   surface.setSize(img.width, img.height);
   img.loadPixels();
 }
@@ -145,14 +152,14 @@ void draw(){
 void keyPressed(){
     if (key == 'a'){
       if (drawH == false) {
-        pixelized(5);
+        pixelized(16);
         drawH = true;
       } else {
         drawH = false;
     }
   } else if (key == 'b') {
     if (mono == false) {
-      monochromePix(100);
+      monochromePix(267);
       mono = true;
     } else {
       setup();
