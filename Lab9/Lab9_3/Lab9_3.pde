@@ -73,7 +73,7 @@ int calcDiff(int diff, int[]current_hist, int[]previous_hist){
 }
 
 void testCandidate(int currentDiff){
-  if (currentDiff > thresholdB){
+  if (currentDiff>thresholdB){
     current_frame.save("data/shots/frame" + frame + ".png");
     file.println("Frame nº: " + frame  +  " Difference: " + currentDiff + "Time: " + mov.time() + "s");
     file.flush();
@@ -93,10 +93,14 @@ void testCandidate(int currentDiff){
     }
   }
   
-  if(cumulative >= thresholdB){
+  if(currentDiff <= thresholdS && currentDiff >= thresholdB){
     candidate_frame.save("data/shots/frame" + frame + ".png");
     file.println("Frame nº: " + candidateFrame  +  " Difference: " + candidateDiff + "Time: " + candidateTime + "s");
     file.flush();
+    cumulative = 0;
+    candidate = false;
+  }
+  else{
     cumulative = 0;
     candidate = false;
   }
