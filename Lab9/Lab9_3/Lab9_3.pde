@@ -83,8 +83,6 @@ void transitionDetect(){
   
   currentDiff = calcDiff(currentDiff, red_previous_hist, green_previous_hist, blue_previous_hist, red_current_hist, green_current_hist, blue_current_hist);
   testCandidate(currentDiff);
-
-  
 }
 
 int calcDiff(int diff, int[] red_previous_hist, int[] green_previous_hist, int[] blue_previous_hist, int[] red_current_hist, int[] green_current_hist, int[] blue_current_hist){
@@ -97,7 +95,33 @@ int calcDiff(int diff, int[] red_previous_hist, int[] green_previous_hist, int[]
 }
 
 void testCandidate(int currentDiff){
-  if (currentDiff>thresholdB){
+  if (currentDiff > thresholdS) {
+    cumulative += currentDiff - candidateDiff;
+  }
+  
+  else if (currentDiff < thresholdS && cumulative > thresholdB) {
+    current_frame.save("data/frames/frame" + frame + ".png");
+    file.println("Frame nº: " + frame  +  " Difference: " + currentDiff + "Time: " + mov.time() + "s");
+    file.flush();
+  }
+  
+  else if(currentDiff < thresholdS && cumulative < thresholdB) {
+    cumulative = 0;
+    candidate = false;
+  }
+  
+  else if(currentDiff > thresholdS && currentDiff < thresholdB){
+    if(candidate == false){
+      candidate = true;
+      cumulative = currentDiff;
+      candidateDiff = currentDiff;
+      candidateTime = mov.time();
+      candidateFrame = frame;
+      candidate_frame.copy(mov, 0, 0, width, height,0,0,width,height); 
+    }
+  }
+    
+ /* if (currentDiff>thresholdB){
     current_frame.save("data/frames/frame" + frame + ".png");
     file.println("Frame nº: " + frame  +  " Difference: " + currentDiff + "Time: " + mov.time() + "s");
     file.flush();
@@ -113,7 +137,7 @@ void testCandidate(int currentDiff){
       candidate_frame.copy(mov, 0, 0, width, height,0,0,width,height); 
     }
     else{
-      cumulative += candidateDiff - currentDiff; 
+      cumulative += currentDiff - candidateDiff; 
     }
   }
   
@@ -127,5 +151,5 @@ void testCandidate(int currentDiff){
   else{
     cumulative = 0;
     candidate = false;
-  }
+  }*/
 }

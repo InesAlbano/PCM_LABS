@@ -24,7 +24,7 @@ void draw() {
 }
 
 void stroboSeg(){
-  if (timer < mov.time())  {
+  if (timer <= mov.time())  {
     saveFrame("data/frames/frame" + frame + ".png");
     file.println("Frame: " + frame  + ", " + "Time: " + mov.time() + "s");
     file.flush();
