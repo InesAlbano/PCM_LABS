@@ -1,7 +1,7 @@
 import processing.video.*;
 Movie m;
 
-int frame = 1;
+int frames = 1;
 int cumulative = 0;
 
 boolean candidate = false;
@@ -9,8 +9,8 @@ int candidateDiff = 0;
 float candidateTime;
 int candidateFrame;
 
-int thresholdS= 160000;
-int thresholdB= 200000;
+int thresholdS= 50000;
+int thresholdB= 150000;
 PrintWriter file;
 PImage previous_frame = createImage(900,500,RGB);
 PImage current_frame = createImage(900,500,RGB);
@@ -21,6 +21,7 @@ void setup() {
   m = new Movie(this, "PCMLab9.mov");
   size(900,500);
   m.play();
+  m.volume(0);
   file = createWriter("data/timeFrame.txt");
   file.flush();
 }
@@ -28,75 +29,64 @@ void setup() {
 void draw() {
   if (m.available()) {
     m.read();
-    image(m, 0, 0, width, height);
+    image(m, 0, 0, m.width, m.height);
     transitionDetect();
-    frame++;
+    ++frames;
   }
 }
 
 void transitionDetect(){
-  if (frame == 1) {
-    previous_frame.copy(m, 0, 0, width, height,0,0,width,height);
-    current_frame.copy(m, 0, 0, width, height,0,0,width,height);
-    current_frame.save("data/frames/frame" + frame + ".png");
-  }
-  else { 
-    previous_frame.copy(current_frame, 0, 0, width, height,0,0,width,height);
-    current_frame.copy(m, 0, 0, width, height,0,0,width,height); 
-  }
-  int currentDiff = 0;
+  int diff = 0;
   int[]previous_hist = new int[256];
   int[]current_hist = new int[256];
   
-  for (int i = 0; i < m.width; i++) {
-    for (int j = 0; j < m.height; j++) {
-      int previous_bright = int(brightness(previous_frame.get(i, j)));
-      int current_bright = int(brightness(current_frame.get(i, j)));
-      previous_hist[previous_bright]++;
-      current_hist[current_bright]++;
+  if (frames == 1) {
+    // pimg.copy(src, sx, sy, sw, sh, dx, dy, dw, dh)
+    previous_frame.copy(m, 0, 0, m.width, m.height, 0, 0, m.width, m.height);
+    current_frame.copy(m, 0, 0, m.width, m.height, 0, 0, m.width, m.height);
+    current_frame.save("data/frames/frame" + frames + ".png");
+  } else { 
+    previous_frame.copy(current_frame, 0, 0, m.width, m.height, 0, 0, m.width, m.height);
+    current_frame.copy(m, 0, 0, m.width, m.height, 0, 0, m.width, m.height); 
+  }
+    
+  for (int w = 0; w < m.width; ++w) {
+    for (int h = 0; h < m.height; ++h) {
+      previous_hist[int(brightness(previous_frame.get(w, h)))]++;
+      current_hist[int(brightness(current_frame.get(w, h)))]++;
     }
   }
   
-  currentDiff = calcDiff(currentDiff, current_hist, previous_hist);
-  testCandidate(currentDiff);
-}
-
-int calcDiff(int diff, int[]current_hist, int[]previous_hist){
   for(int i =0; i<256;i++){
      diff += abs(current_hist[i]-previous_hist[i]);
   }
-  return diff;
-}
-
-void testCandidate(int currentDiff){
-  if (currentDiff>thresholdB){
-    current_frame.save("data/frames/frame" + frame + ".png");
-    file.println("Frame nº: " + frame + " Time: " + m.time() + "s");
+  
+  // If current difference is higher than Tb, then is transition
+  if (diff >= thresholdB){
+    current_frame.save("data/frames/frame" + frames + ".png");
+    file.println(nf(m.time(),0, 7));
     file.flush();
   }
   
-  if(currentDiff > thresholdS && currentDiff < thresholdB){
+  // If current difference is higher than Ts, then it might be transition
+  if(diff > thresholdS && diff < thresholdB){
     if(candidate == false){
       candidate = true;
-      cumulative = currentDiff;
-      candidateDiff = currentDiff;
+      cumulative = diff;
+      candidateDiff = diff;
       candidateTime = m.time();
-      candidateFrame = frame;
-      candidate_frame.copy(m, 0, 0, width, height,0,0,width,height); 
-    }
-    else{
-      cumulative += candidateDiff - currentDiff; 
+      candidateFrame = frames;
+      candidate_frame.copy(m, 0, 0, m.width, m.height, 0, 0, m.width, m.height); 
+    } else {
+      cumulative += candidateDiff - diff; 
     }
   }
   
-  if(currentDiff <= thresholdS && currentDiff >= thresholdB){
-    candidate_frame.save("data/frames/frame" + frame + ".png");
-    file.println("Frame nº: " + candidateFrame + " Time: " + candidateTime + "s");
+  // If cumulative difference is higher than Tb, then is transition
+  if(cumulative >= thresholdB){
+    candidate_frame.save("data/frames/frame" + frames + ".png");
+    file.println(nf(candidateTime, 0, 7));
     file.flush();
-    cumulative = 0;
-    candidate = false;
-  }
-  else{
     cumulative = 0;
     candidate = false;
   }
