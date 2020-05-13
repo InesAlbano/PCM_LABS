@@ -1,7 +1,0 @@
-Frame nº: 55 Difference: 245880Time: 4.21s
-Frame nº: 113 Difference: 415314Time: 8.21s
-Frame nº: 134 Difference: 382202Time: 9.95s
-Frame nº: 141 Difference: 273186Time: 10.54s
-Frame nº: 172 Difference: 328172Time: 12.79s
-Frame nº: 193 Difference: 307668Time: 14.32s
-Frame nº: 237 Difference: 461036Time: 17.36s
