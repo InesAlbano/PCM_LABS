@@ -12,6 +12,8 @@ PImage black = createImage(900, 540, RGB);
 
 int start;
 int wipeCounter = 0;
+int widthCounter = 0;
+int heightCounter = 0;
 float fadeTime = 4000;
 float dissolveTime = 2000;
 
@@ -19,6 +21,7 @@ boolean wipeFlag = false;
 boolean fadeFlag = false;
 boolean dissolveFlag = false;
 boolean chromaFlag = false;
+boolean ourFlag = false;
 
 void setup() {
   black.loadPixels();
@@ -50,6 +53,8 @@ void draw() {
     dissolve();
   } else if(chromaFlag) {
     chromaKey();
+  } else if(ourFlag) {
+    our();
   } else {
     frame = m.get();
     image(frame, 0, 0, width, height);
@@ -129,7 +134,7 @@ void dissolve() {        //exercise 3
   }
 }
 
-void chromaKey() {
+void chromaKey() {        //exercise 4
   frame1 = m1.get();
   frame2 = m2.get();
   frame1.resize(900,540);
@@ -140,8 +145,10 @@ void chromaKey() {
   for (int i = 0; i < frame1.width; i++) {
     for (int j = 0; j < frame1.height; j++) {
       int place = i + j * frame1.width;
+      float r = red(frame2.pixels[place]);
       float g = green(frame2.pixels[place]);
-      if (g==255) {
+      float b = blue(frame2.pixels[place]);
+      if (g==255 & (r<250 || b<250)) {
         frame2.pixels[place] = frame1.pixels[place];
       }
     }
@@ -149,6 +156,40 @@ void chromaKey() {
   
   frame2.updatePixels();
   image(frame2, 0, 0, width, height);
+}
+
+void our() {          //exercise 5
+  PImage frame1 = m.get();
+  PImage frame2 = other.get();
+  frame1.resize(900,540);
+  frame2.resize(900,540);
+  frame1.loadPixels();
+  for (int i = 0; i < frame1.width; i++) {
+    for (int j = 0; j < frame1.height; j++) {
+      int place = i + j * frame1.width;
+      if (i > (frame1.width/2 - widthCounter/2) & i < (frame1.width/2 + widthCounter/2)) {
+        if (j > (frame1.height/2 - heightCounter/2) & j < (frame1.height/2 + heightCounter/2)) {
+          frame1.pixels[place] = frame2.get(i,j);
+        }
+      }
+    }
+  }
+  if (widthCounter < frame1.width) {
+    widthCounter += frame1.width/50;
+  }
+  if (heightCounter < frame1.height) {
+    heightCounter += frame1.height/50;
+  }
+  else if (widthCounter >= frame1.width){
+    ourFlag = false;
+    widthCounter = 0;
+    heightCounter = 0;
+    Movie temp = m;
+    m = other;
+    other = temp;
+  }
+  frame1.updatePixels();
+  image(frame1, 0, 0, width, height);
 }
 
 void keyPressed() {
@@ -186,6 +227,14 @@ void keyPressed() {
       m = m2;
       other = m1;
       chromaFlag = true;
+    }
+  } else if (key == 'o') {
+    if (ourFlag == true) {
+      widthCounter = 0;
+      heightCounter = 0;
+      ourFlag = false;
+    } else {
+      ourFlag = true;
     }
   }
 }
