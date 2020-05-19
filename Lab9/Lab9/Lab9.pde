@@ -16,9 +16,7 @@ PImage previous_frame3 = createImage(900,500,RGB);
 PImage current_frame3 = createImage(900,500,RGB);
 PImage candidate_frame3 = createImage(900,500,RGB);
 boolean candidate3 = false;
-int candidateDiff3 = 0;
 float candidateTime3;
-int candidateFrame3;
 
 PrintWriter file4;
 int frames4 = 1;
@@ -26,10 +24,10 @@ PImage previous_frame4 = createImage(900,500,RGB);
 PImage current_frame4 = createImage(900,500,RGB);
 
 void setup() {
-  m = new Movie(this, "PCMLab9.mov");
+  m = new Movie(this, "ripInPeace.mp4");
   size(900,500);
   m.play();
-  //m.volume(0);
+  m.volume(0);
   file1 = createWriter("data/timeFrame1.txt");
   file1.flush();
   file2 = createWriter("data/timeFrame2.txt");
@@ -45,7 +43,7 @@ void draw() {
   if (m.available()) {
     m.read();
     image(m, 0, 0);
-    stroboscopicSegmentation(); // exercise 1
+    stroboscopicSegmentation(2); // exercise 1
     transitionDetectThreshold(180000); // exercise 2
     transitionDetectTwin(50000, 150000); //exercise 3
     saveTransitions(50000, 150000); // exercise 4
@@ -56,12 +54,12 @@ void draw() {
   }
 }
 
-void stroboscopicSegmentation(){ // exercise 1
+void stroboscopicSegmentation(int time){ // exercise 1
   if (timer <= m.time())  { // stroboscopic segmentation
       saveFrame("data/frames1/frame" + frames1 + ".png");
       file1.println(nf(m.time(),0, 7));
       file1.flush();
-      timer+=2;
+      timer+=time;
     }
 }
 
@@ -102,6 +100,7 @@ void transitionDetectTwin(int thresholdS, int thresholdB){ // exercise 3
   int diff = 0;
   int[]previous_hist = new int[256];
   int[]current_hist = new int[256];
+  int[]candidate_hist = new int[256];
   
   if (frames3 == 1) {
     // pimg.copy(src, sx, sy, sw, sh, dx, dy, dw, dh)
@@ -119,9 +118,15 @@ void transitionDetectTwin(int thresholdS, int thresholdB){ // exercise 3
       current_hist[int(brightness(current_frame3.get(w, h)))]++;
     }
   }
-  
-  for(int i =0; i<256;i++){
-     diff += abs(current_hist[i]-previous_hist[i]);
+  System.out.println(candidate3);
+  if(!candidate3) {
+    for(int i =0; i<256;i++){
+       diff += abs(current_hist[i]-previous_hist[i]);
+    }
+  } else {
+    for(int i =0; i<256;i++){
+       diff += abs(current_hist[i] - candidate_hist[i]);
+    }
   }
   
   // If current difference is higher than Tb, then is transition
@@ -132,26 +137,34 @@ void transitionDetectTwin(int thresholdS, int thresholdB){ // exercise 3
   }
   
   // If current difference is higher than Ts, then it might be transition
-  if(diff > thresholdS && diff < thresholdB){
+  if(diff > thresholdS /*&& diff < thresholdB*/){
     if(candidate3 == false){
       candidate3 = true;
-      cumulative3 = diff;
-      candidateDiff3 = diff;
+     // cumulative3 = diff;
       candidateTime3 = m.time();
-      candidateFrame3 = frames3;
       candidate_frame3.copy(m, 0, 0, m.width, m.height, 0, 0, m.width, m.height); 
+      for (int w = 0; w < m.width; ++w) {
+        for (int h = 0; h < m.height; ++h) {
+          candidate_hist[int(brightness(candidate_frame3.get(w, h)))]++;
+        }
+      }
     } else {
-      cumulative3 += candidateDiff3 - diff; 
+      cumulative3 += diff; 
     }
   }
   
   // If cumulative difference is higher than Tb, then is transition
-  if(cumulative3 >= thresholdB){
+  if(diff < thresholdS && cumulative3 >= thresholdB){
     candidate_frame3.save("data/frames3/frame" + frames3 + ".png");
     file3.println(nf(candidateTime3, 0, 7));
     file3.flush();
     cumulative3 = 0;
     candidate3 = false;
+  }
+  
+  if (diff < thresholdS && cumulative3 < thresholdB){
+    candidate3 = false;
+    cumulative3 = 0;
   }
 }
 
