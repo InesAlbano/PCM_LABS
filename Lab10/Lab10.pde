@@ -4,6 +4,8 @@ Movie m1;
 Movie m2;
 Movie m;
 Movie other;
+Movie chroma;
+Movie back;
 
 PImage frame1;
 PImage frame2;
@@ -16,6 +18,10 @@ int widthCounter = 0;
 int heightCounter = 0;
 float fadeTime = 4000;
 float dissolveTime = 2000;
+
+int[] hist = new int[360];
+int thresh = 15; // tolerance of
+int maxHue;
 
 boolean wipeFlag = false;
 boolean fadeFlag = false;
@@ -30,8 +36,8 @@ void setup() {
   }
   black.updatePixels();
   size(900,540);
-  m1 = new Movie(this, "PCMLab10-1.mov");
-  m2 = new Movie(this, "PCMLab10-2.mov");
+  m1 = new Movie(this, "before.mp4");
+  m2 = new Movie(this, "after.mp4");
   m = m1;
   other = m2;
   m1.loop();
@@ -134,9 +140,29 @@ void dissolve() {        //exercise 3
   }
 }
 
+void calcChroma() {
+  frame2 = chroma.get();
+  frame2.resize(900,540);
+  frame2.loadPixels();
+  for (int i = 0; i < frame2.width; i++) {
+    for (int j = 0; j < frame2.height; j++) {
+      int place = i + j * frame2.width;
+      int hue = int(hue(frame2.pixels[place]));
+      hist[hue]++;
+    }
+  }
+  int max = 0;
+  for (int i = 0; i < 360; i++) {
+    if (max < hist[i]) {
+      max = hist[i];
+      maxHue = i;
+    }
+  }
+}
+
 void chromaKey() {        //exercise 4
-  frame1 = m1.get();
-  frame2 = m2.get();
+  frame1 = back.get();
+  frame2 = chroma.get();
   frame1.resize(900,540);
   frame2.resize(900,540);
   frame1.loadPixels();
@@ -145,10 +171,8 @@ void chromaKey() {        //exercise 4
   for (int i = 0; i < frame1.width; i++) {
     for (int j = 0; j < frame1.height; j++) {
       int place = i + j * frame1.width;
-      float r = red(frame2.pixels[place]);
-      float g = green(frame2.pixels[place]);
-      float b = blue(frame2.pixels[place]);
-      if (g==255 & (r<250 || b<250)) {
+      float h = hue(frame2.pixels[place]);
+      if (h > maxHue-thresh & h < maxHue+thresh) {
         frame2.pixels[place] = frame1.pixels[place];
       }
     }
@@ -192,6 +216,10 @@ void our() {          //exercise 5
   image(frame1, 0, 0, width, height);
 }
 
+void mousePressed() {
+  
+}
+
 void keyPressed() {
   if (key == '1') {
     m = m1;
@@ -222,10 +250,17 @@ void keyPressed() {
     }
   } else if (key == 'c') {
     if (chromaFlag == true) {
+      chroma.stop();
+      back.stop();
       chromaFlag = false;
     } else {
-      m = m2;
-      other = m1;
+      chroma = new Movie(this, "collection_A/chromaKey.mp4");
+      back = new Movie(this, "collection_A/background.mp4");
+      chroma.loop();
+      chroma.volume(0);
+      back.loop();
+      back.volume(0);
+      calcChroma();
       chromaFlag = true;
     }
   } else if (key == 'o') {
